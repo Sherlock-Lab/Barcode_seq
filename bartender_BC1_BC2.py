@@ -25,9 +25,9 @@ os.system('mkdir interm_file') # create a directory to put the intermediate file
 
 os.system('pear -f %s -r %s -o interm_file/%s -j 8 -n 150 ' %(inFile1, inFile2, out_file)) # -j threads, Merge F and R Fastq files when overlapping and adjust Qscore
 
-os.system("bowtie2-build bowtie_file/Ref_bowtie.fasta bowtie_file/ref_BC -q")  # Builds the new reference db using the ref fasta file												
+os.system("/Users/lucasherissant/bowtie2-2.2.0/bowtie2-build bowtie_file/Ref_bowtie.fasta bowtie_file/ref_BC -q")  # Builds the new reference db using the ref fasta file												
 
-os.system("bowtie2 -U interm_file/%s.assembled.fastq -p 8 -5 17 -3 17 --reorder --no-hd --n-ceil L,0,0.50 -L 12 --np 0 -x bowtie_file/ref_BC -S interm_file/seq.sam --norc" %(out_file))  
+os.system("/Users/lucasherissant/bowtie2-2.2.0/bowtie2 -U interm_file/%s.assembled.fastq -p 8 -5 17 -3 17 --reorder --no-hd --n-ceil L,0,0.50 -L 12 --np 0 -x bowtie_file/ref_BC -S interm_file/seq.sam --norc" %(out_file))  
 
 # -p 8 (uses 8 threads), 
 # -5 17 (cuts first 17, 5' side), 
@@ -487,7 +487,7 @@ for key in multiplex_dic:
 
 	for key_id in merged_id_umi_dic:
 		# reassociate the BC1 and teh BC2 together and keep all the 2BC that have more than 2 different UMI
-		if int(merged_id_umi_dic[key_id]) > 2:
+		if int(merged_id_umi_dic[key_id]) > 0:
 			BC1_id, BC2_id = key_id.split('_')
 
 			w_cluster = str(BC2_id) + str('_') + str(BC1_id) + '\t' + str(cluster_BC2[BC2_id]+ '\t' + str(cluster_BC1[BC1_id]) + '\t' + str(merged_id_umi_dic[key_id]) + str('\n'))
