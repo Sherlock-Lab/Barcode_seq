@@ -1,0 +1,16 @@
+This is a tool to extract BC frequencies over time from lineage tracking sequencing data
+
+Usage: lineage.py ( align | barcodes | demultiplexL | BC1cluster | BCtables | bartender | trajectories ) [ --data <data> ]  [ --m <multiplex> ] [ --o <outfile> ] [ --BC1 <BC1file> ]
+	lineage.py ( align ) [ --data <data> ]
+	lineage.py ( barcodes )
+	lineage.py ( demultiplexL ) [ --m <multiplex> ] [ --o <outfile> ]
+	lineage.py ( BCtables )
+	lineage.py ( BC1cluster )
+	lineage.py ( bartender )
+	lineage.py ( trajectories )
+	
+Options:
+	--data <data> Raw paired end sequencing data
+	--m <multiplex> Txt file that corresponds indices to library prep (timepoint)
+	--o <outfile> Output file
+	--BC1 <BC1file> File with BC1 used at each evolution
