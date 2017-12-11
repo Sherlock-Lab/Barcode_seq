@@ -1,4 +1,4 @@
-# python bartender_BC1_BC2_lucas.py fastq_f fastq_r multiplex_file
+# python bartender_BC1_BC2_lucas.py fastq_f fastq_r multiplex_file True
 
 # you need to have the directory bowtie_file/ created with the
 # Reference file (fasta file) here Ref_bowtie.fasta, and bowtie will
@@ -16,6 +16,55 @@ import os.path
 import subprocess
 from subprocess import call
 from operator import itemgetter
+
+inFile1 = sys.argv[1]  # Forward fastq file
+inFile2 = sys.argv[2]  # Reverse fastq file
+infile3 = sys.argv[3]  # multiplex file
+out_file = inFile1[0:(len(inFile1)-6)] # define output for PEAR (fastq files name wihtout extension)
+new_table = sys.argv[4]  # do you want to make table file or use existing one? make new one = True Table files are individual files for each sample that contains reads data demultiplexed to that sample
+Low_diversity_BC_file = sys.argv[5] # path to the file with the low diversity Barcode
+
+
+depth=3*10**7 #  corespond to the depth of the coverage to determine the lineages to eliminate for 1M reads 1*10**6
+
+
+multiplex_file = open(infile3, 'r') # !! if fastq file is merged file put reverse sequence of reverse primers !
+multiplex_dic = {}
+outfile_dic = {}
+multiplex_pool = {}
+nb_line_dic = {}
+
+for line in multiplex_file:
+
+	# here we create directory and file for each multiplex pairs
+	# based on the multiplex files that contains: name of sample
+	# \t forward multiplex \t Reverse multiplex with (reversed
+	# complemented) sequence compare to the primer
+
+	# we open a file as a value of a dictionnary that we will call
+	# later be carefull to close those file after writting in it
+
+	(condition, replicat, genreation, multiplex_f, multiplex_r)  = line.rstrip('\n').split('\t') # split the line
+	multiplex = multiplex_f + '_' + multiplex_r
+	dir_name = condition + '_' + replicat + '_' + genreation
+	multiplex_dic[multiplex] = dir_name
+	nb_line_dic[multiplex] = 0
+
+
+	# check if user wants to new make table files
+	if new_table == True:
+		os.system('mkdir %s' % dir_name) #create the directory
+
+		outFile = open('%s/table_file.txt' % dir_name, 'w') # make the file
+		outFile.close()
+
+	outfile_path = '%s/table_file.txt' % dir_name
+
+	outfile_dic[multiplex] = outfile_path
+
+
+multiplex_file.close()
+
 
 def levenshtein(s, t):
         ''' From Wikipedia article; Iterative with two matrix rows. '''
@@ -36,17 +85,14 @@ def levenshtein(s, t):
                 
         return v1[len(t)]
     
-LD_pool=open('/Volumes/Promise_Pegasus/seb/lineage_lucas/pool_file_2n_final.txt','r')
+LD_pool=open(Low_diversity_BC_file,'r')
+#create a list of low diversity barcodes to compare to.
 lignes_LD=LD_pool.readlines()
 pool=[lignes_LD[i].split('\t')[2] for i in range(len(lignes_LD))]
 LD_pool.close()
 
-depth=3*10**7 #  corespond to the depth of the coverage to determine the lineages to eliminate for 1M reads 1*10**6
 
-inFile1 = sys.argv[1]  # Forward fastq file
-inFile2 = sys.argv[2]  # Reverse fastq file
-infile3 = sys.argv[3]  # multiplex file
-out_file = inFile1[0:(len(inFile1)-6)] # define output for PEAR (fastq files name wihtout extension)
+
 
 os.mkdir('interm_file') # create a directory to put the intermediate file
 
@@ -200,36 +246,8 @@ print('number of unaligned read with * = ' + str(counter_star))	#Prints out the 
 print('number reads with one BC at least with wrong size =' + str(count_diff_size))
 print('number reads with both BC at good size = ' + str(count_26))
 
-multiplex_file = open(infile3, 'r') # !! if fastq file is merged file put reverse sequence of reverse primers !
-multiplex_dic = {}
-outfile_dic = {}
-multiplex_pool = {}
-nb_line_dic = {}
-
-for line in multiplex_file:
-
-	# here we create directory and file for each multiplex pairs
-	# based on the multiplex files that contains: name of sample
-	# \t forward multiplex \t Reverse multiplex with (reversed
-	# complemented) sequence compare to the primer
-
-	# we open a file as a value of a dictionnary that we will call
-	# later be carefull to close those file after writting in it
-
-	(condition, replicat, genreation, multiplex_f, multiplex_r)  = line.rstrip('\n').split('\t') # split the line
-	multiplex = multiplex_f + '_' + multiplex_r
-	dir_name = condition + '_' + replicat + '_' + genreation
-	multiplex_dic[multiplex] = dir_name
-	nb_line_dic[multiplex] = 0
-
-	os.system('mkdir %s' % dir_name)
-
-	outFile = '%s/table_file.txt' % dir_name
-
-	outfile_dic[multiplex] = outFile
 
 
-multiplex_file.close()
 
 count_unmatch_id = 0
 line_numb = -3
